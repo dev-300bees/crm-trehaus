@@ -41,6 +41,7 @@ $stmt->close();
 <head>
     <title>Editar Galería</title>
     <?php include 'partials/styles.php'; ?>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone/dist/dropzone.css">
 </head>
 <body>
 <div class="d-flex">
@@ -71,16 +72,18 @@ $stmt->close();
                          data-url="<?php echo $galeria['cover']; ?>"></div>
                 </div>
                 <div class="mb-3">
-                <label for="edit-dropzone-imagenes" class="form-label">Imágenes de la Galería</label>
-                <div id="edit-dropzone-imagenes" class="dropzone" 
-                        data-existing-images='<?php echo htmlspecialchars(json_encode(array_map(function ($imagen) {
-                            return [
-                                'name' => basename($imagen['imagen']), // Nombre del archivo
-                                'url' => $imagen['imagen'], // URL completa del archivo
-                            ];
-                        }, $imagenes), JSON_HEX_APOS | JSON_HEX_QUOT)); ?>'></div>
-                </div>
-
+                    <label for="edit-dropzone-imagenes" class="form-label">Imágenes de la Galería</label>
+                    <div class="mb-3">
+                        <label for="edit-dropzone-imagenes" class="form-label">Imágenes de la Galería</label>
+                        <div id="edit-dropzone-imagenes" class="dropzone" 
+                                data-existing-images='<?php echo json_encode(array_map(function ($imagen) {
+                                    return [
+                                        'name' => basename($imagen['imagen']), // Nombre del archivo
+                                        'url' => $imagen['imagen'] // URL completa del archivo
+                                    ];
+                                }, $imagenes)); ?>'>
+                        </div>
+                    </div>
                 <button type="submit" class="btn btn-primary">Guardar Cambios</button>
             </form>
         </div>

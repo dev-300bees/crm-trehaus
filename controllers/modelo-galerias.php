@@ -73,46 +73,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'editar') {
     $newImages = $_FILES['imagenes'] ?? [];
     $deletedImages = $_POST['deleted_images'] ?? [];
 
-    $targetDir = "../uploads/gallery/";
+    $targetDir = "../assets/images/gallery/";
 
-    // Actualizar el nombre y la fecha
+    // Actualizar nombre y fecha
     $stmt = $conn->prepare("UPDATE galerias SET nombre = ?, fecha = ? WHERE id = ?");
     $stmt->bind_param("ssi", $nombre, $fecha, $id);
-    $stmt->execute();
+    if (!$stmt->execute()) {
+        echo json_encode(['success' => false, 'message' => 'Error al actualizar la galería.']);
+        exit;
+    }
 
-    // Manejar la imagen destacada
+    // Manejar la imagen destacada (cover)
     if ($newCover) {
         $coverName = uniqid() . "." . pathinfo($newCover['name'], PATHINFO_EXTENSION);
         $coverPath = $targetDir . $coverName;
 
+        // Subir la nueva imagen destacada
         if (move_uploaded_file($newCover['tmp_name'], $coverPath)) {
+            // Actualizar la imagen destacada en la base de datos
             $stmt = $conn->prepare("UPDATE galerias SET cover = ? WHERE id = ?");
             $stmt->bind_param("si", $coverPath, $id);
             $stmt->execute();
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error al subir la imagen destacada.']);
+            exit;
         }
     }
 
     // Eliminar imágenes marcadas para eliminación
-    foreach ($deletedImages as $imagePath) {
-        unlink($imagePath);
-        $stmt = $conn->prepare("DELETE FROM galeria_imagenes WHERE imagen = ?");
-        $stmt->bind_param("s", $imagePath);
-        $stmt->execute();
-    }
+    if (!empty($deletedImages)) {
+        foreach ($deletedImages as $deletedId) {
+            // Obtener la ruta del archivo a eliminar
+            $stmt = $conn->prepare("SELECT imagen FROM galeria_imagenes WHERE id = ?");
+            $stmt->bind_param("i", $deletedId);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-    // Agregar nuevas imágenes
-    foreach ($newImages as $index => $newImage) {
-        if ($newImage['error'] === 0) {
-            $imageName = uniqid() . "." . pathinfo($newImage['name'], PATHINFO_EXTENSION);
-            $imagePath = $targetDir . $imageName;
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                $filePath = $row['imagen'];
 
-            if (move_uploaded_file($newImage['tmp_name'], $imagePath)) {
-                $stmt = $conn->prepare("INSERT INTO galeria_imagenes (galeria_id, imagen) VALUES (?, ?)");
-                $stmt->bind_param("is", $id, $imagePath);
+                // Eliminar el archivo del servidor
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+
+                // Eliminar el registro de la base de datos
+                $stmt = $conn->prepare("DELETE FROM galeria_imagenes WHERE id = ?");
+                $stmt->bind_param("i", $deletedId);
                 $stmt->execute();
             }
         }
     }
 
-    echo json_encode(['success' => true]);
+    // Subir nuevas imágenes
+    if (!empty($newImages['name'])) {
+        foreach ($newImages['name'] as $index => $name) {
+            if ($newImages['error'][$index] === 0) {
+                $fileName = uniqid() . "." . pathinfo($name, PATHINFO_EXTENSION);
+                $filePath = $targetDir . $fileName;
+
+                // Subir el archivo al servidor
+                if (move_uploaded_file($newImages['tmp_name'][$index], $filePath)) {
+                    // Insertar la nueva imagen en la base de datos
+                    $stmt = $conn->prepare("INSERT INTO galeria_imagenes (galeria_id, imagen) VALUES (?, ?)");
+                    $stmt->bind_param("is", $id, $filePath);
+                    $stmt->execute();
+                }
+            }
+        }
+    }
+
+    echo json_encode(['success' => true, 'message' => 'Galería actualizada correctamente.']);
+    exit;
 }

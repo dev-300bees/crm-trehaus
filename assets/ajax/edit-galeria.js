@@ -43,14 +43,14 @@ Dropzone.autoDiscover = false;
 
             this.on("removedfile", function (file) {
                 if (file.existing) {
-                    deletedFiles.push(file.name); // Agregar archivos existentes eliminados
+                    deletedFiles.push(file.name); // Agregar el nombre de la imagen eliminada
                 } else {
                     galleryFiles = galleryFiles.filter(f => f !== file); // Remover nuevos archivos
                 }
             });
 
             // Precargar archivos existentes
-            const existingImages = JSON.parse($("#edit-dropzone-imagenes").data("existing-images"));
+            const existingImages = JSON.parse($("#edit-dropzone-imagenes").attr("data-existing-images"));
             existingImages.forEach(image => {
                 const mockFile = { name: image.name, size: 12345, existing: true };
                 this.emit("addedfile", mockFile);
@@ -60,9 +60,9 @@ Dropzone.autoDiscover = false;
             });
         },
     });
+
 $(document).ready(function () {
     
-
     // Manejar el envío del formulario
     $("#edit-galeria-form").on("submit", function (e) {
         e.preventDefault();
@@ -79,9 +79,9 @@ $(document).ready(function () {
             formData.append(`imagenes[${index}]`, file);
         });
 
-        // Agregar imágenes eliminadas al FormData
-        deletedFiles.forEach((file, index) => {
-            formData.append(`deleted_images[${index}]`, file);
+        // Agregar IDs de imágenes eliminadas al FormData
+        deletedFiles.forEach((id, index) => {
+            formData.append(`deleted_images[${index}]`, id);
         });
 
         // Enviar la solicitud AJAX
