@@ -7,7 +7,7 @@
             <a href="eventos.php" class="nav-link text-light">Eventos</a>
         </li>
         <li class="nav-item">
-            <a href="galeria.php" class="nav-link text-light">Galería</a>
+            <a href="galerias.php" class="nav-link text-light">Galería</a>
         </li>
         <li class="nav-item">
             <a href="videos.php" class="nav-link text-light">Videos</a>

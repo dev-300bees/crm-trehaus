@@ -1,0 +1,18 @@
+# Activar la reescritura de URLs
+RewriteEngine On
+
+# Evitar bucles de redirección (NO redirigir si ya estamos en HTTPS)
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Quitar la extensión .php de las URLs
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^([^/.]+)$ $1.php [L]
+
+# Permitir archivos estáticos (CSS, JS, imágenes, etc.)
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Manejar errores 404 a una página personalizada (opcional)
+ErrorDocument 404 /404.php
