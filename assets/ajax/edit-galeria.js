@@ -92,10 +92,11 @@ $(document).ready(function () {
             processData: false,
             contentType: false,
             success: function (response) {
+                console.log(response);
                 const res = JSON.parse(response);
                 if (res.success) {
                     Swal.fire("Éxito", "Galería actualizada correctamente", "success").then(() => {
-                        window.location.href = "galerias.php";
+                        //window.location.href = "galerias.php";
                     });
                 } else {
                     Swal.fire("Error", res.message, "error");

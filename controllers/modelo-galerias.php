@@ -102,16 +102,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'editar') {
 
     // Eliminar imágenes marcadas para eliminación
     if (!empty($deletedImages)) {
-        foreach ($deletedImages as $deletedId) {
+        foreach ($deletedImages as $deletedName) {
             // Obtener la ruta del archivo a eliminar
-            $stmt = $conn->prepare("SELECT imagen FROM galeria_imagenes WHERE id = ?");
-            $stmt->bind_param("i", $deletedId);
+            $filePath = '../assets/images/gallery/'.$deletedName;
+            $stmt = $conn->prepare("SELECT id FROM galeria_imagenes WHERE imagen = ?");
+            $stmt->bind_param("s", $filePath);
             $stmt->execute();
             $result = $stmt->get_result();
 
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
-                $filePath = $row['imagen'];
+                $deletedId = $row['id'];
 
                 // Eliminar el archivo del servidor
                 if (file_exists($filePath)) {
@@ -144,6 +145,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'editar') {
         }
     }
 
-    echo json_encode(['success' => true, 'message' => 'Galería actualizada correctamente.']);
+    echo json_encode(['success' => true,'data' => $filePath, 'message' => 'Galería actualizada correctamente.']);
     exit;
 }

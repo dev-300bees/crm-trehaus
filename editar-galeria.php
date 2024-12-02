@@ -78,11 +78,11 @@ $stmt->close();
                         <div id="edit-dropzone-imagenes" class="dropzone" 
                                 data-existing-images='<?php echo json_encode(array_map(function ($imagen) {
                                     return [
+                                        'id' => $imagen['id'],
                                         'name' => basename($imagen['imagen']), // Nombre del archivo
                                         'url' => $imagen['imagen'] // URL completa del archivo
                                     ];
-                                }, $imagenes)); ?>'>
-                        </div>
+                                }, $imagenes)); ?>'></div>
                     </div>
                 <button type="submit" class="btn btn-primary">Guardar Cambios</button>
             </form>
