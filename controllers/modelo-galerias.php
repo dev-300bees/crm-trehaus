@@ -148,3 +148,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'editar') {
     echo json_encode(['success' => true,'data' => $filePath, 'message' => 'Galería actualizada correctamente.']);
     exit;
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'eliminar') {
+        $galeriaId = intval($_POST['id']);
+
+        // Verificar que la galería exista
+        $stmt = $conn->prepare("SELECT cover FROM galerias WHERE id = ?");
+        $stmt->bind_param("i", $galeriaId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 0) {
+            echo json_encode(['success' => false, 'message' => 'La galería no existe.']);
+            exit;
+        }
+
+        // Obtener la imagen destacada para eliminarla
+        $galeria = $result->fetch_assoc();
+        $coverPath = $galeria['cover'];
+
+        // Eliminar la imagen destacada si existe
+        if (file_exists($coverPath)) {
+            unlink($coverPath);
+        }
+
+        // Obtener las imágenes asociadas a la galería
+        $stmt = $conn->prepare("SELECT imagen FROM galeria_imagenes WHERE galeria_id = ?");
+        $stmt->bind_param("i", $galeriaId);
+        $stmt->execute();
+        $imagenesResult = $stmt->get_result();
+
+        // Eliminar cada imagen y su registro
+        while ($row = $imagenesResult->fetch_assoc()) {
+            $imagePath = $row['imagen'];
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+        }
+
+        // Eliminar los registros de imágenes de la base de datos
+        $stmt = $conn->prepare("DELETE FROM galeria_imagenes WHERE galeria_id = ?");
+        $stmt->bind_param("i", $galeriaId);
+        $stmt->execute();
+
+        // Eliminar la galería de la base de datos
+        $stmt = $conn->prepare("DELETE FROM galerias WHERE id = ?");
+        $stmt->bind_param("i", $galeriaId);
+
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error al eliminar la galería.']);
+        }
+        exit;
+}

@@ -13,9 +13,7 @@ $(document).ready(function () {
                 const res = JSON.parse(response); 
 
                 if (res.status === 'success') {
-                    Swal.fire('Éxito', res.message, 'success').then(() => {
-                        window.location.href = 'index.php'; 
-                    });
+                    window.location.href = 'index.php'; 
                 } else {
                     Swal.fire('Error', res.message, 'error');
                 }

@@ -43,7 +43,7 @@ check_authentication();
                                 <td>
                                 <a href='ver-galeria.php?id={$row['id']}' class='btn btn-info btn-sm'>Ver</a>
                                     <a href='editar-galeria.php?id={$row['id']}' class='btn btn-warning btn-sm'>Editar</a>
-                                    <button class='btn btn-danger btn-sm delete-galeria' data-id='{$row['id']}'>Eliminar</button>
+                                    <button class='btn btn-danger btn-sm btn-delete-galeria' data-id='{$row['id']}'>Eliminar</button>
                                 </td>
                               </tr>";
                     }
@@ -55,4 +55,5 @@ check_authentication();
 </div>
 </body>
 <?php include 'partials/script.php'; ?>
+<script src="assets/ajax/delete-galeria.js"></script>
 </html>
